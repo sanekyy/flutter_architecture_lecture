@@ -1,4 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+const _uuid = Uuid();
+
+@immutable
+class Todo {
+  const Todo({
+    required this.description,
+    required this.id,
+    this.completed = false,
+  });
+
+  final String id;
+  final String description;
+  final bool completed;
+
+  @override
+  String toString() {
+    return 'Todo(description: $description, completed: $completed)';
+  }
+}
+
+/// The different ways to filter the list of todos
+enum TodoListFilter {
+  all,
+  active,
+  completed,
+}
 
 void main() {
   runApp(const MyApp());
@@ -7,109 +35,313 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return const MaterialApp(
+      home: Home(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Home> createState() => _HomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeState extends State<Home> {
+  late TextEditingController _newTodoController;
+  late TodoListFilter _filter;
+  late List<Todo> _todos;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    _newTodoController = TextEditingController();
+    _filter = TodoListFilter.all;
+    _todos = const [
+      Todo(id: 'todo-0', description: 'hi'),
+      Todo(id: 'todo-1', description: 'hello'),
+      Todo(id: 'todo-2', description: 'bonjour'),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+    final filteredTodos = _getFilteredTodos();
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          children: [
+            const Title(),
+            TextField(
+              controller: _newTodoController,
+              decoration: const InputDecoration(
+                labelText: 'What needs to be done?',
+              ),
+              onSubmitted: (value) {
+                _add(value);
+                _newTodoController.clear();
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            const SizedBox(height: 42),
+            Toolbar(
+              todos: _todos,
+              filter: _filter,
+              setFilter: (filter) => setState(() => _filter = filter),
             ),
+            if (_todos.isNotEmpty) const Divider(height: 0),
+            for (var i = 0; i < filteredTodos.length; i++) ...[
+              if (i > 0) const Divider(height: 0),
+              Dismissible(
+                key: ValueKey(filteredTodos[i].id),
+                onDismissed: (_) {
+                  _remove(filteredTodos[i]);
+                },
+                child: TodoItem(
+                  todo: filteredTodos[i],
+                  editDescription: (value) => _edit(
+                    id: filteredTodos[i].id,
+                    description: value,
+                  ),
+                  toggle: () => _toggle(filteredTodos[i].id),
+                ),
+              )
+            ],
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  List<Todo> _getFilteredTodos() {
+    switch (_filter) {
+      case TodoListFilter.completed:
+        return _todos.where((todo) => todo.completed).toList();
+      case TodoListFilter.active:
+        return _todos.where((todo) => !todo.completed).toList();
+      case TodoListFilter.all:
+        return _todos;
+    }
+  }
+
+  void _add(String description) {
+    setState(() {
+      _todos = [
+        ..._todos,
+        Todo(
+          id: _uuid.v4(),
+          description: description,
+        ),
+      ];
+    });
+  }
+
+  void _edit({required String id, required String description}) {
+    setState(() {
+      _todos = [
+        for (final todo in _todos)
+          if (todo.id == id)
+            Todo(
+              id: todo.id,
+              completed: todo.completed,
+              description: description,
+            )
+          else
+            todo,
+      ];
+    });
+  }
+
+  void _toggle(String id) {
+    setState(() {
+      _todos = [
+        for (final todo in _todos)
+          if (todo.id == id)
+            Todo(
+              id: todo.id,
+              completed: !todo.completed,
+              description: todo.description,
+            )
+          else
+            todo,
+      ];
+    });
+  }
+
+  void _remove(Todo target) {
+    setState(() {
+      _todos = _todos.where((todo) => todo.id != target.id).toList();
+    });
+  }
+}
+
+class Toolbar extends StatelessWidget {
+  const Toolbar({
+    Key? key,
+    required this.todos,
+    required this.filter,
+    required this.setFilter,
+  }) : super(key: key);
+
+  final List<Todo> todos;
+  final TodoListFilter filter;
+  final ValueSetter<TodoListFilter> setFilter;
+
+  @override
+  Widget build(BuildContext context) {
+    Color? textColorFor(TodoListFilter value) {
+      return filter == value ? Colors.blue : Colors.black;
+    }
+
+    final uncompletedTodosCount = todos.where((todo) => !todo.completed).length;
+
+    return Material(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              '$uncompletedTodosCount items left',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Tooltip(
+            message: 'All todos',
+            child: TextButton(
+              onPressed: () => setFilter(TodoListFilter.all),
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                foregroundColor:
+                    MaterialStateProperty.all(textColorFor(TodoListFilter.all)),
+              ),
+              child: const Text('All'),
+            ),
+          ),
+          Tooltip(
+            message: 'Only uncompleted todos',
+            child: TextButton(
+              onPressed: () => setFilter(TodoListFilter.active),
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                foregroundColor: MaterialStateProperty.all(
+                  textColorFor(TodoListFilter.active),
+                ),
+              ),
+              child: const Text('Active'),
+            ),
+          ),
+          Tooltip(
+            message: 'Only completed todos',
+            child: TextButton(
+              onPressed: () => setFilter(TodoListFilter.completed),
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                foregroundColor: MaterialStateProperty.all(
+                  textColorFor(TodoListFilter.completed),
+                ),
+              ),
+              child: const Text('Completed'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Title extends StatelessWidget {
+  const Title({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'todos',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: Color.fromARGB(38, 47, 47, 247),
+        fontSize: 100,
+        fontWeight: FontWeight.w100,
+        fontFamily: 'Helvetica Neue',
+      ),
+    );
+  }
+}
+
+class TodoItem extends StatefulWidget {
+  const TodoItem({
+    Key? key,
+    required this.todo,
+    required this.editDescription,
+    required this.toggle,
+  }) : super(key: key);
+
+  final Todo todo;
+  final ValueSetter<String> editDescription;
+  final VoidCallback toggle;
+
+  @override
+  State<TodoItem> createState() => _TodoItemState();
+}
+
+class _TodoItemState extends State<TodoItem> {
+  late final FocusNode _itemFocusNode;
+  var _isFocused = false;
+  late final FocusNode _textFieldFocusNode;
+  late final TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _itemFocusNode = FocusNode();
+    _itemFocusNode.addListener(() {
+      setState(() => _isFocused = _itemFocusNode.hasFocus);
+    });
+
+    _textFieldFocusNode = FocusNode();
+
+    _textEditingController = TextEditingController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      elevation: 6,
+      child: Focus(
+        focusNode: _itemFocusNode,
+        onFocusChange: (focused) {
+          if (focused) {
+            _textEditingController.text = widget.todo.description;
+          } else {
+            // Commit changes only when the textfield is unfocused, for performance
+            widget.editDescription(_textEditingController.text);
+          }
+        },
+        child: ListTile(
+          onTap: () {
+            _itemFocusNode.requestFocus();
+            _textFieldFocusNode.requestFocus();
+          },
+          leading: Checkbox(
+            value: widget.todo.completed,
+            onChanged: (value) => widget.toggle(),
+          ),
+          title: _isFocused
+              ? TextField(
+                  autofocus: true,
+                  focusNode: _textFieldFocusNode,
+                  controller: _textEditingController,
+                )
+              : Text(widget.todo.description),
+        ),
+      ),
     );
   }
 }
