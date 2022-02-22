@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart' hide Title;
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
-import 'package:flutter_architecture_lecture/main.dart';
 import 'package:flutter_architecture_lecture/ui/title.dart';
 import 'package:flutter_architecture_lecture/ui/todo_item.dart';
 import 'package:flutter_architecture_lecture/ui/toolbar.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -14,22 +14,19 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late TextEditingController _newTodoController;
-  late TodoLogic _todoLogic;
 
   @override
   void initState() {
     super.initState();
 
-    _todoLogic = getIt.get<TodoLogic>();
-
     _newTodoController = TextEditingController();
-
-    _todoLogic.addListener(() => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredTodos = _todoLogic.getFilteredTodos();
+    final todoLogic = context.watch<TodoLogic>();
+
+    final filteredTodos = todoLogic.getFilteredTodos();
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -39,24 +36,20 @@ class _HomeState extends State<Home> {
           children: [
             const Title(),
             TextField(
-              controller: _newTodoController,
-              decoration: const InputDecoration(
-                labelText: 'What needs to be done?',
-              ),
-              onSubmitted: (value) {
-                _todoLogic.add(value);
-                _newTodoController.clear();
-              },
-            ),
+                controller: _newTodoController,
+                decoration: const InputDecoration(
+                  labelText: 'What needs to be done?',
+                ),
+                onSubmitted: _addTodo),
             const SizedBox(height: 42),
             const Toolbar(),
-            if (_todoLogic.todos.isNotEmpty) const Divider(height: 0),
+            if (todoLogic.todos.isNotEmpty) const Divider(height: 0),
             for (var i = 0; i < filteredTodos.length; i++) ...[
               if (i > 0) const Divider(height: 0),
               Dismissible(
                 key: ValueKey(filteredTodos[i].id),
                 onDismissed: (_) {
-                  _todoLogic.remove(filteredTodos[i]);
+                  todoLogic.remove(filteredTodos[i]);
                 },
                 child: TodoItem(
                   todo: filteredTodos[i],
@@ -67,5 +60,10 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  void _addTodo(String description) {
+    context.read<TodoLogic>().add(description);
+    _newTodoController.clear();
   }
 }

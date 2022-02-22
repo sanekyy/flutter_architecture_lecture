@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
-import 'package:flutter_architecture_lecture/main.dart';
+import 'package:provider/provider.dart';
 
 class TodoItem extends StatefulWidget {
   const TodoItem({
@@ -26,7 +26,7 @@ class _TodoItemState extends State<TodoItem> {
   void initState() {
     super.initState();
 
-    _todoLogic = getIt.get<TodoLogic>();
+    _todoLogic = context.read<TodoLogic>();
 
     _itemFocusNode = FocusNode();
     _itemFocusNode.addListener(() {

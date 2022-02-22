@@ -6,6 +6,7 @@ import 'package:flutter_architecture_lecture/main.config.dart';
 import 'package:flutter_architecture_lecture/ui/home.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:provider/provider.dart';
 
 final getIt = GetIt.instance;
 
@@ -38,8 +39,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Home(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => getIt.get<TodoLogic>()),
+      ],
+      child: const MaterialApp(
+        home: Home(),
+      ),
     );
   }
 }
