@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Title;
-import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/data/models/todo_event.dart';
+import 'package:flutter_architecture_lecture/domain/todo_bloc.dart';
 import 'package:flutter_architecture_lecture/ui/title.dart';
 import 'package:flutter_architecture_lecture/ui/todo_item.dart';
 import 'package:flutter_architecture_lecture/ui/toolbar.dart';
@@ -24,8 +25,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final todoLogic = context.watch<TodoLogic>();
-    final state = todoLogic.state;
+    final todoBloc = context.watch<TodoBloc>();
+    final state = todoBloc.state;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -48,7 +49,7 @@ class _HomeState extends State<Home> {
               Dismissible(
                 key: ValueKey(state.filteredTodos[i].id),
                 onDismissed: (_) {
-                  todoLogic.remove(state.filteredTodos[i]);
+                  todoBloc.add(OnRemoveTodoEvent(state.filteredTodos[i]));
                 },
                 child: TodoItem(
                   todo: state.filteredTodos[i],
@@ -62,7 +63,7 @@ class _HomeState extends State<Home> {
   }
 
   void _addTodo(String description) {
-    context.read<TodoLogic>().add(description);
+    context.read<TodoBloc>().add(OnAddTodoEvent(description));
     _newTodoController.clear();
   }
 }

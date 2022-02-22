@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Title;
 import 'package:flutter_architecture_lecture/data/repositories/todo_repository.dart';
 import 'package:flutter_architecture_lecture/domain/id_generator.dart';
-import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/domain/todo_bloc.dart';
 import 'package:flutter_architecture_lecture/main.config.dart';
 import 'package:flutter_architecture_lecture/ui/home.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,8 +23,8 @@ abstract class DependenciesModule {
   TodoRepository todoRepository() => TodoRepository();
 
   @lazySingleton
-  TodoLogic todoLogic(IDGenerator idGenerator, TodoRepository todoRepository) =>
-      TodoLogic(
+  TodoBloc todoBloc(IDGenerator idGenerator, TodoRepository todoRepository) =>
+      TodoBloc(
         idGenerator: idGenerator,
         todoRepository: todoRepository,
       );
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        BlocProvider(create: (_) => getIt.get<TodoLogic>()),
+        BlocProvider(create: (_) => getIt.get<TodoBloc>()),
       ],
       child: const MaterialApp(
         home: Home(),

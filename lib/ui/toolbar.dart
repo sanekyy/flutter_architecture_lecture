@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_architecture_lecture/data/models/todo_event.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
-import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/domain/todo_bloc.dart';
 import 'package:provider/provider.dart';
 
 class Toolbar extends StatelessWidget {
@@ -10,9 +11,9 @@ class Toolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final todoLogic = context.watch<TodoLogic>();
+    final todoBloc = context.watch<TodoBloc>();
 
-    final state = todoLogic.state;
+    final state = todoBloc.state;
 
     Color? textColorFor(TodoListFilter value) {
       return state.filter == value ? Colors.blue : Colors.black;
@@ -34,7 +35,8 @@ class Toolbar extends StatelessWidget {
           Tooltip(
             message: 'All todos',
             child: TextButton(
-              onPressed: () => todoLogic.setFilter(TodoListFilter.all),
+              onPressed: () =>
+                  todoBloc.add(OnSetFilterTodoEvent(TodoListFilter.all)),
               style: ButtonStyle(
                 visualDensity: VisualDensity.compact,
                 foregroundColor:
@@ -46,7 +48,8 @@ class Toolbar extends StatelessWidget {
           Tooltip(
             message: 'Only uncompleted todos',
             child: TextButton(
-              onPressed: () => todoLogic.setFilter(TodoListFilter.active),
+              onPressed: () =>
+                  todoBloc.add(OnSetFilterTodoEvent(TodoListFilter.active)),
               style: ButtonStyle(
                 visualDensity: VisualDensity.compact,
                 foregroundColor: MaterialStateProperty.all(
@@ -59,7 +62,8 @@ class Toolbar extends StatelessWidget {
           Tooltip(
             message: 'Only completed todos',
             child: TextButton(
-              onPressed: () => todoLogic.setFilter(TodoListFilter.completed),
+              onPressed: () =>
+                  todoBloc.add(OnSetFilterTodoEvent(TodoListFilter.completed)),
               style: ButtonStyle(
                 visualDensity: VisualDensity.compact,
                 foregroundColor: MaterialStateProperty.all(

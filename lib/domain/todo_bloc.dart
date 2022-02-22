@@ -1,30 +1,37 @@
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
+import 'package:flutter_architecture_lecture/data/models/todo_bloc_state.dart';
+import 'package:flutter_architecture_lecture/data/models/todo_event.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
-import 'package:flutter_architecture_lecture/data/models/todo_logic_state.dart';
 import 'package:flutter_architecture_lecture/data/repositories/todo_repository.dart';
 import 'package:flutter_architecture_lecture/domain/id_generator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TodoLogic extends Cubit<TodoLogicState> {
+class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final IDGenerator _idGenerator;
   final TodoRepository _todoRepository;
 
-  TodoLogic({
+  TodoBloc({
     required IDGenerator idGenerator,
     required TodoRepository todoRepository,
   })  : _idGenerator = idGenerator,
         _todoRepository = todoRepository,
         super(
-          TodoLogicState(
+          TodoState(
             filter: TodoListFilter.all,
             todos: todoRepository.todos,
           ),
-        );
+        ) {
+    on(_add);
+    on(_edit);
+    on(_toggle);
+    on(_remove);
+    on(_setFilter);
+  }
 
-  void add(String description) {
+  void _add(OnAddTodoEvent event, Emitter<TodoState> emit) {
     final todo = Todo(
       id: _idGenerator.generate(),
-      description: description,
+      description: event.description,
     );
 
     _todoRepository.add(todo);
@@ -36,13 +43,13 @@ class TodoLogic extends Cubit<TodoLogicState> {
     );
   }
 
-  void edit({required String id, required String description}) {
-    final todo = _todoRepository.todos.firstWhere((it) => it.id == id);
+  void _edit(OnEditTodoEvent event, Emitter<TodoState> emit) {
+    final todo = _todoRepository.todos.firstWhere((it) => it.id == event.id);
 
     final updatedTodo = Todo(
       id: todo.id,
       completed: todo.completed,
-      description: description,
+      description: event.description,
     );
 
     _todoRepository.update(updatedTodo);
@@ -54,8 +61,8 @@ class TodoLogic extends Cubit<TodoLogicState> {
     );
   }
 
-  void toggle(String id) {
-    final todo = _todoRepository.todos.firstWhere((it) => it.id == id);
+  void _toggle(OnToggleTodoEvent event, Emitter<TodoState> emit) {
+    final todo = _todoRepository.todos.firstWhere((it) => it.id == event.id);
 
     final updatedTodo = Todo(
       id: todo.id,
@@ -72,8 +79,8 @@ class TodoLogic extends Cubit<TodoLogicState> {
     );
   }
 
-  void remove(Todo todo) {
-    _todoRepository.remove(todo);
+  void _remove(OnRemoveTodoEvent event, Emitter<TodoState> emit) {
+    _todoRepository.remove(event.todo);
 
     emit(
       state.copyWith(
@@ -82,10 +89,10 @@ class TodoLogic extends Cubit<TodoLogicState> {
     );
   }
 
-  void setFilter(TodoListFilter filter) {
+  void _setFilter(OnSetFilterTodoEvent event, Emitter<TodoState> emit) {
     emit(
       state.copyWith(
-        filter: filter,
+        filter: event.filter,
       ),
     );
   }
