@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart' hide Title;
-import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/domain/todo_cubit.dart';
 import 'package:flutter_architecture_lecture/ui/title.dart';
 import 'package:flutter_architecture_lecture/ui/todo_item.dart';
 import 'package:flutter_architecture_lecture/ui/toolbar.dart';
@@ -24,8 +24,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final todoLogic = context.watch<TodoLogic>();
-    final state = todoLogic.state;
+    final todoCubit = context.watch<TodoCubit>();
+    final state = todoCubit.state;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
               Dismissible(
                 key: ValueKey(state.filteredTodos[i].id),
                 onDismissed: (_) {
-                  todoLogic.remove(state.filteredTodos[i]);
+                  todoCubit.remove(state.filteredTodos[i]);
                 },
                 child: TodoItem(
                   todo: state.filteredTodos[i],
@@ -62,7 +62,7 @@ class _HomeState extends State<Home> {
   }
 
   void _addTodo(String description) {
-    context.read<TodoLogic>().add(description);
+    context.read<TodoCubit>().add(description);
     _newTodoController.clear();
   }
 }

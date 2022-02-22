@@ -1,7 +1,7 @@
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
 
-class TodoLogicState {
+class TodoState {
   final TodoListFilter filter;
   final List<Todo> todos;
 
@@ -16,16 +16,16 @@ class TodoLogicState {
     }
   }
 
-  TodoLogicState({
+  TodoState({
     required this.filter,
     required this.todos,
   });
 
-  TodoLogicState copyWith({
+  TodoState copyWith({
     TodoListFilter? filter,
     List<Todo>? todos,
   }) {
-    return TodoLogicState(
+    return TodoState(
       filter: filter ?? this.filter,
       todos: todos ?? this.todos,
     );
