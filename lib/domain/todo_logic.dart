@@ -1,34 +1,25 @@
-import 'dart:async';
-
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_logic_state.dart';
 import 'package:flutter_architecture_lecture/data/repositories/todo_repository.dart';
 import 'package:flutter_architecture_lecture/domain/id_generator.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TodoLogic {
+class TodoLogic extends Cubit<TodoLogicState> {
   final IDGenerator _idGenerator;
   final TodoRepository _todoRepository;
-
-  final _subject = BehaviorSubject<TodoLogicState>();
-
-  TodoLogicState get state => _subject.value;
-
-  Stream<TodoLogicState> get stateStream => _subject;
 
   TodoLogic({
     required IDGenerator idGenerator,
     required TodoRepository todoRepository,
   })  : _idGenerator = idGenerator,
-        _todoRepository = todoRepository {
-    _subject.add(
-      TodoLogicState(
-        filter: TodoListFilter.all,
-        todos: todoRepository.todos,
-      ),
-    );
-  }
+        _todoRepository = todoRepository,
+        super(
+          TodoLogicState(
+            filter: TodoListFilter.all,
+            todos: todoRepository.todos,
+          ),
+        );
 
   void add(String description) {
     final todo = Todo(
@@ -38,8 +29,8 @@ class TodoLogic {
 
     _todoRepository.add(todo);
 
-    _subject.add(
-      _subject.value.copyWith(
+    emit(
+      state.copyWith(
         todos: _todoRepository.todos,
       ),
     );
@@ -56,8 +47,8 @@ class TodoLogic {
 
     _todoRepository.update(updatedTodo);
 
-    _subject.add(
-      _subject.value.copyWith(
+    emit(
+      state.copyWith(
         todos: _todoRepository.todos,
       ),
     );
@@ -74,8 +65,8 @@ class TodoLogic {
 
     _todoRepository.update(updatedTodo);
 
-    _subject.add(
-      _subject.value.copyWith(
+    emit(
+      state.copyWith(
         todos: _todoRepository.todos,
       ),
     );
@@ -84,16 +75,16 @@ class TodoLogic {
   void remove(Todo todo) {
     _todoRepository.remove(todo);
 
-    _subject.add(
-      _subject.value.copyWith(
+    emit(
+      state.copyWith(
         todos: _todoRepository.todos,
       ),
     );
   }
 
   void setFilter(TodoListFilter filter) {
-    _subject.add(
-      _subject.value.copyWith(
+    emit(
+      state.copyWith(
         filter: filter,
       ),
     );

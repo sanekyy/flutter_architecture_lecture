@@ -4,6 +4,7 @@ import 'package:flutter_architecture_lecture/domain/id_generator.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
 import 'package:flutter_architecture_lecture/main.config.dart';
 import 'package:flutter_architecture_lecture/ui/home.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(create: (_) => getIt.get<TodoLogic>()),
+        BlocProvider(create: (_) => getIt.get<TodoLogic>()),
       ],
       child: const MaterialApp(
         home: Home(),
