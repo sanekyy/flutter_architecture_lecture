@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/main.dart';
 
 class TodoItem extends StatefulWidget {
   const TodoItem({
     Key? key,
     required this.todo,
-    required this.todoLogic,
   }) : super(key: key);
 
   final Todo todo;
-  final TodoLogic todoLogic;
 
   @override
   State<TodoItem> createState() => _TodoItemState();
 }
 
 class _TodoItemState extends State<TodoItem> {
+  late final TodoLogic _todoLogic;
   late final FocusNode _itemFocusNode;
   var _isFocused = false;
   late final FocusNode _textFieldFocusNode;
@@ -25,6 +25,8 @@ class _TodoItemState extends State<TodoItem> {
   @override
   void initState() {
     super.initState();
+
+    _todoLogic = getIt.get<TodoLogic>();
 
     _itemFocusNode = FocusNode();
     _itemFocusNode.addListener(() {
@@ -48,7 +50,7 @@ class _TodoItemState extends State<TodoItem> {
             _textEditingController.text = widget.todo.description;
           } else {
             // Commit changes only when the textfield is unfocused, for performance
-            widget.todoLogic.edit(
+            _todoLogic.edit(
               id: widget.todo.id,
               description: _textEditingController.text,
             );
@@ -61,7 +63,7 @@ class _TodoItemState extends State<TodoItem> {
           },
           leading: Checkbox(
             value: widget.todo.completed,
-            onChanged: (value) => widget.todoLogic.toggle(widget.todo.id),
+            onChanged: (value) => _todoLogic.toggle(widget.todo.id),
           ),
           title: _isFocused
               ? TextField(

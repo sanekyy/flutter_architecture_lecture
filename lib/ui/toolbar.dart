@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/main.dart';
 
 class Toolbar extends StatelessWidget {
   const Toolbar({
     Key? key,
-    required this.todoLogic,
   }) : super(key: key);
-
-  final TodoLogic todoLogic;
 
   @override
   Widget build(BuildContext context) {
+    final todoLogic = getIt.get<TodoLogic>();
+
     Color? textColorFor(TodoListFilter value) {
       return todoLogic.filter == value ? Colors.blue : Colors.black;
     }

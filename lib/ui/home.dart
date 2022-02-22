@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart' hide Title;
-import 'package:flutter_architecture_lecture/data/repositories/todo_repository.dart';
-import 'package:flutter_architecture_lecture/domain/id_generator.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/main.dart';
 import 'package:flutter_architecture_lecture/ui/title.dart';
 import 'package:flutter_architecture_lecture/ui/todo_item.dart';
 import 'package:flutter_architecture_lecture/ui/toolbar.dart';
@@ -21,11 +20,9 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
+    _todoLogic = getIt.get<TodoLogic>();
+
     _newTodoController = TextEditingController();
-    _todoLogic = TodoLogic(
-      idGenerator: IDGenerator(),
-      todoRepository: TodoRepository(),
-    );
 
     _todoLogic.addListener(() => setState(() {}));
   }
@@ -52,7 +49,7 @@ class _HomeState extends State<Home> {
               },
             ),
             const SizedBox(height: 42),
-            Toolbar(todoLogic: _todoLogic),
+            const Toolbar(),
             if (_todoLogic.todos.isNotEmpty) const Divider(height: 0),
             for (var i = 0; i < filteredTodos.length; i++) ...[
               if (i > 0) const Divider(height: 0),
@@ -63,7 +60,6 @@ class _HomeState extends State<Home> {
                 },
                 child: TodoItem(
                   todo: filteredTodos[i],
-                  todoLogic: _todoLogic,
                 ),
               )
             ],
