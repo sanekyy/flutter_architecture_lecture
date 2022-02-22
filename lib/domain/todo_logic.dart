@@ -1,35 +1,33 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
+import 'package:flutter_architecture_lecture/data/models/todo_logic_state.dart';
 import 'package:flutter_architecture_lecture/data/repositories/todo_repository.dart';
 import 'package:flutter_architecture_lecture/domain/id_generator.dart';
+import 'package:rxdart/rxdart.dart';
 
-class TodoLogic extends ChangeNotifier {
+class TodoLogic {
   final IDGenerator _idGenerator;
   final TodoRepository _todoRepository;
 
-  late TodoListFilter _filter;
+  final _subject = BehaviorSubject<TodoLogicState>();
 
-  TodoListFilter get filter => _filter;
+  TodoLogicState get state => _subject.value;
 
-  List<Todo> get todos => _todoRepository.todos;
+  Stream<TodoLogicState> get stateStream => _subject;
 
   TodoLogic({
     required IDGenerator idGenerator,
     required TodoRepository todoRepository,
   })  : _idGenerator = idGenerator,
-        _todoRepository = todoRepository,
-        _filter = TodoListFilter.all;
-
-  List<Todo> getFilteredTodos() {
-    switch (_filter) {
-      case TodoListFilter.completed:
-        return todos.where((todo) => todo.completed).toList();
-      case TodoListFilter.active:
-        return todos.where((todo) => !todo.completed).toList();
-      case TodoListFilter.all:
-        return todos;
-    }
+        _todoRepository = todoRepository {
+    _subject.add(
+      TodoLogicState(
+        filter: TodoListFilter.all,
+        todos: todoRepository.todos,
+      ),
+    );
   }
 
   void add(String description) {
@@ -40,11 +38,15 @@ class TodoLogic extends ChangeNotifier {
 
     _todoRepository.add(todo);
 
-    notifyListeners();
+    _subject.add(
+      _subject.value.copyWith(
+        todos: _todoRepository.todos,
+      ),
+    );
   }
 
   void edit({required String id, required String description}) {
-    final todo = todos.firstWhere((it) => it.id == id);
+    final todo = _todoRepository.todos.firstWhere((it) => it.id == id);
 
     final updatedTodo = Todo(
       id: todo.id,
@@ -54,11 +56,15 @@ class TodoLogic extends ChangeNotifier {
 
     _todoRepository.update(updatedTodo);
 
-    notifyListeners();
+    _subject.add(
+      _subject.value.copyWith(
+        todos: _todoRepository.todos,
+      ),
+    );
   }
 
   void toggle(String id) {
-    final todo = todos.firstWhere((it) => it.id == id);
+    final todo = _todoRepository.todos.firstWhere((it) => it.id == id);
 
     final updatedTodo = Todo(
       id: todo.id,
@@ -68,17 +74,28 @@ class TodoLogic extends ChangeNotifier {
 
     _todoRepository.update(updatedTodo);
 
-    notifyListeners();
+    _subject.add(
+      _subject.value.copyWith(
+        todos: _todoRepository.todos,
+      ),
+    );
   }
 
   void remove(Todo todo) {
     _todoRepository.remove(todo);
 
-    notifyListeners();
+    _subject.add(
+      _subject.value.copyWith(
+        todos: _todoRepository.todos,
+      ),
+    );
   }
 
   void setFilter(TodoListFilter filter) {
-    _filter = filter;
-    notifyListeners();
+    _subject.add(
+      _subject.value.copyWith(
+        filter: filter,
+      ),
+    );
   }
 }

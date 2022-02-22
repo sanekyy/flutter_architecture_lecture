@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
+import 'package:flutter_architecture_lecture/data/models/todo_logic_state.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
 import 'package:provider/provider.dart';
 
@@ -10,14 +11,20 @@ class Toolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TodoLogic>(
-      builder: (_, todoLogic, __) {
+    final todoLogic = context.watch<TodoLogic>();
+
+    return StreamBuilder<TodoLogicState>(
+      initialData: todoLogic.state,
+      stream: todoLogic.stateStream,
+      builder: (_, snapshot) {
+        final state = snapshot.requireData;
+
         Color? textColorFor(TodoListFilter value) {
-          return todoLogic.filter == value ? Colors.blue : Colors.black;
+          return state.filter == value ? Colors.blue : Colors.black;
         }
 
         final uncompletedTodosCount =
-            todoLogic.todos.where((todo) => !todo.completed).length;
+            state.todos.where((todo) => !todo.completed).length;
 
         return Material(
           child: Row(
