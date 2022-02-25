@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart' hide Title;
-import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
+import 'package:flutter_architecture_lecture/main.dart';
 import 'package:flutter_architecture_lecture/ui/title.dart';
 import 'package:flutter_architecture_lecture/ui/todo_item.dart';
 import 'package:flutter_architecture_lecture/ui/toolbar.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Home extends StatefulWidget {
+class Home extends ConsumerStatefulWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
-  State<Home> createState() => _HomeState();
+  _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends ConsumerState<Home> {
   late TextEditingController _newTodoController;
 
   @override
@@ -24,7 +24,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final todoLogic = context.watch<TodoLogic>();
+    final todoLogic = ref.watch(todoLogicProvider);
 
     final filteredTodos = todoLogic.getFilteredTodos();
 
@@ -63,7 +63,7 @@ class _HomeState extends State<Home> {
   }
 
   void _addTodo(String description) {
-    context.read<TodoLogic>().add(description);
+    ref.read(todoLogicProvider).add(description);
     _newTodoController.clear();
   }
 }

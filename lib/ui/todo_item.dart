@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/domain/todo_logic.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_architecture_lecture/main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TodoItem extends StatefulWidget {
+class TodoItem extends ConsumerStatefulWidget {
   const TodoItem({
     Key? key,
     required this.todo,
@@ -12,10 +13,10 @@ class TodoItem extends StatefulWidget {
   final Todo todo;
 
   @override
-  State<TodoItem> createState() => _TodoItemState();
+  _TodoItemState createState() => _TodoItemState();
 }
 
-class _TodoItemState extends State<TodoItem> {
+class _TodoItemState extends ConsumerState<TodoItem> {
   late final TodoLogic _todoLogic;
   late final FocusNode _itemFocusNode;
   var _isFocused = false;
@@ -26,7 +27,7 @@ class _TodoItemState extends State<TodoItem> {
   void initState() {
     super.initState();
 
-    _todoLogic = context.read<TodoLogic>();
+    _todoLogic = ref.read(todoLogicProvider);
 
     _itemFocusNode = FocusNode();
     _itemFocusNode.addListener(() {

@@ -202,6 +202,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  flutter_riverpod:
+    dependency: "direct main"
+    description:
+      name: flutter_riverpod
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -215,7 +222,7 @@ packages:
     source: hosted
     version: "2.1.2"
   get_it:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: get_it
       url: "https://pub.dartlang.org"
@@ -250,7 +257,7 @@ packages:
     source: hosted
     version: "4.0.0"
   injectable:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: injectable
       url: "https://pub.dartlang.org"
@@ -326,13 +333,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
-  nested:
-    dependency: transitive
-    description:
-      name: nested
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
   package_config:
     dependency: transitive
     description:
@@ -354,13 +354,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.0"
-  provider:
-    dependency: "direct main"
-    description:
-      name: provider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "6.0.2"
   pub_semver:
     dependency: transitive
     description:
@@ -375,6 +368,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0"
+  riverpod:
+    dependency: transitive
+    description:
+      name: riverpod
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   shelf:
     dependency: transitive
     description:
@@ -415,6 +415,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.10.0"
+  state_notifier:
+    dependency: transitive
+    description:
+      name: state_notifier
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.7.2+1"
   stream_channel:
     dependency: transitive
     description:
@@ -501,4 +508,4 @@ packages:
     version: "3.1.0"
 sdks:
   dart: ">=2.16.0-134.5.beta <3.0.0"
-  flutter: ">=1.16.0"
+  flutter: ">=1.17.0"
