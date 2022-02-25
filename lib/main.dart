@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart' hide Title;
 import 'package:flutter_architecture_lecture/data/repositories/todo_repository.dart';
 import 'package:flutter_architecture_lecture/domain/id_generator.dart';
-import 'package:flutter_architecture_lecture/domain/todo_bloc.dart';
+import 'package:flutter_architecture_lecture/domain/store.dart';
+import 'package:flutter_architecture_lecture/domain/todo.dart';
 import 'package:flutter_architecture_lecture/main.config.dart';
 import 'package:flutter_architecture_lecture/ui/home.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 
 final getIt = GetIt.instance;
 
@@ -21,13 +22,6 @@ abstract class DependenciesModule {
 
   @singleton
   TodoRepository todoRepository() => TodoRepository();
-
-  @lazySingleton
-  TodoBloc todoBloc(IDGenerator idGenerator, TodoRepository todoRepository) =>
-      TodoBloc(
-        idGenerator: idGenerator,
-        todoRepository: todoRepository,
-      );
 }
 
 void main() {
@@ -40,10 +34,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        BlocProvider(create: (_) => getIt.get<TodoBloc>()),
-      ],
+    return StoreProvider<GlobalState>(
+      store: globalStore,
       child: const MaterialApp(
         home: Home(),
       ),

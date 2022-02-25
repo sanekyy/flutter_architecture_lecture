@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_lecture/data/models/todo.dart';
-import 'package:flutter_architecture_lecture/data/models/todo_event.dart';
-import 'package:flutter_architecture_lecture/domain/todo_bloc.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_architecture_lecture/domain/store.dart';
+import 'package:flutter_architecture_lecture/domain/todo.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 
 class TodoItem extends StatefulWidget {
   const TodoItem({
@@ -17,7 +17,6 @@ class TodoItem extends StatefulWidget {
 }
 
 class _TodoItemState extends State<TodoItem> {
-  late final TodoBloc _todoBloc;
   late final FocusNode _itemFocusNode;
   var _isFocused = false;
   late final FocusNode _textFieldFocusNode;
@@ -26,8 +25,6 @@ class _TodoItemState extends State<TodoItem> {
   @override
   void initState() {
     super.initState();
-
-    _todoBloc = context.read<TodoBloc>();
 
     _itemFocusNode = FocusNode();
     _itemFocusNode.addListener(() {
@@ -51,10 +48,12 @@ class _TodoItemState extends State<TodoItem> {
             _textEditingController.text = widget.todo.description;
           } else {
             // Commit changes only when the textfield is unfocused, for performance
-            _todoBloc.add(OnEditTodoEvent(
-              widget.todo.id,
-              _textEditingController.text,
-            ));
+            StoreProvider.of<GlobalState>(context).dispatch(
+              OnEditTodoThunk(
+                id: widget.todo.id,
+                description: _textEditingController.text,
+              ),
+            );
           }
         },
         child: ListTile(
@@ -65,7 +64,9 @@ class _TodoItemState extends State<TodoItem> {
           leading: Checkbox(
             value: widget.todo.completed,
             onChanged: (value) =>
-                _todoBloc.add(OnToggleTodoEvent(widget.todo.id)),
+                StoreProvider.of<GlobalState>(context).dispatch(
+              OnToggleTodoThunk(widget.todo.id),
+            ),
           ),
           title: _isFocused
               ? TextField(

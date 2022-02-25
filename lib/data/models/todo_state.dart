@@ -2,6 +2,8 @@ import 'package:flutter_architecture_lecture/data/models/todo.dart';
 import 'package:flutter_architecture_lecture/data/models/todo_list_filter.dart';
 
 class TodoState {
+  static const empty = TodoState(filter: TodoListFilter.all, todos: []);
+
   final TodoListFilter filter;
   final List<Todo> todos;
 
@@ -16,7 +18,7 @@ class TodoState {
     }
   }
 
-  TodoState({
+  const TodoState({
     required this.filter,
     required this.todos,
   });
